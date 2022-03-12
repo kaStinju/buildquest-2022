@@ -93,8 +93,8 @@ export default class LevelManager {
     this.tilemap.createBlankLayer('layer1', tileset);
   }
 
-  placeWall(x: number, y: number) {
-    this.tilemap.putTileAt((x + y) % 2, x, y);
+  placeWall(index: number, x: number, y: number) {
+    this.tilemap.putTileAt(index, x, y);
     this.staticGroup.add(
       new Wall(
         this.scene,
@@ -102,6 +102,9 @@ export default class LevelManager {
         y * this.tilesConfig.tileHeight,
       ),
     );
+  }
+  placeFloor(index: number, x: number, y: number) {
+    this.tilemap.putTileAt(index, x, y);
   }
 
   generateRoom(
@@ -128,67 +131,101 @@ export default class LevelManager {
     const doorStopX = doorStartX + this.levelConfig.doorWidth;
     const doorStopY = doorStartY + this.levelConfig.doorHeight;
 
+    const wallIndex = rng.int32() % 9;
+    const floorIndex = rng.int32() % 9;
+
     if (isTunnel) {
-      this.placeWall(doorStartX - 1, doorStartY - 1);
-      this.placeWall(doorStartX - 1, doorStopY);
-      this.placeWall(doorStopX, doorStartY - 1);
-      this.placeWall(doorStopX, doorStopY);
+      for (let x = doorStartX - 1; x < doorStopX + 1; x ++) {
+        for (let y = doorStartY - 1; y < doorStopY + 1; y ++) {
+          this.placeFloor(floorIndex, x, y);
+        }
+      }
+      this.placeWall(wallIndex, doorStartX - 1, doorStartY - 1);
+      this.placeWall(wallIndex, doorStartX - 1, doorStopY);
+      this.placeWall(wallIndex, doorStopX, doorStartY - 1);
+      this.placeWall(wallIndex, doorStopX, doorStopY);
       if (up) {
         for (let y = startY; y < doorStartY - 1; y ++) {
-          this.placeWall(doorStartX - 1, y);
-          this.placeWall(doorStopX, y);
+          this.placeWall(wallIndex, doorStartX - 1, y);
+          for (let x = doorStartX; x < doorStopX; x ++) {
+            this.placeFloor(floorIndex, x, y);
+          }
+          this.placeWall(wallIndex, doorStopX, y);
         }
       } else {
         for (let x = doorStartX; x < doorStopX; x ++) {
-          this.placeWall(x, doorStartY - 1);
+          this.placeWall(wallIndex, x, doorStartY - 1);
         }
       }
       if (down) {
         for (let y = doorStopY + 1; y < stopY; y ++) {
-          this.placeWall(doorStartX - 1, y);
-          this.placeWall(doorStopX, y);
+          this.placeWall(wallIndex, doorStartX - 1, y);
+          for (let x = doorStartX; x < doorStopX; x ++) {
+            this.placeFloor(floorIndex, x, y);
+          }
+          this.placeWall(wallIndex, doorStopX, y);
         }
       } else {
         for (let x = doorStartX; x < doorStopX; x ++) {
-          this.placeWall(x, doorStopY);
+          this.placeWall(wallIndex, x, doorStopY);
         }
       }
       if (left) {
         for (let x = startX; x < doorStartX - 1; x ++) {
-          this.placeWall(x, doorStartY - 1);
-          this.placeWall(x, doorStopY);
+          this.placeWall(wallIndex, x, doorStartY - 1);
+          for (let y = doorStartY; y < doorStopY; y ++) {
+            this.placeFloor(floorIndex, x, y);
+          }
+          this.placeWall(wallIndex, x, doorStopY);
         }
       } else {
         for (let y = doorStartY; y < doorStopY; y ++) {
-          this.placeWall(doorStartX - 1, y);
+          this.placeWall(wallIndex, doorStartX - 1, y);
         }
       }
       if (right) {
         for (let x = doorStopX + 1; x < stopX; x ++) {
-          this.placeWall(x, doorStartY - 1);
-          this.placeWall(x, doorStopY);
+          this.placeWall(wallIndex, x, doorStartY - 1);
+          for (let y = doorStartY; y < doorStopY; y ++) {
+            this.placeFloor(floorIndex, x, y);
+          }
+          this.placeWall(wallIndex, x, doorStopY);
         }
       } else {
         for (let y = doorStartY; y < doorStopY; y ++) {
-          this.placeWall(doorStopX, y);
+          this.placeWall(wallIndex, doorStopX, y);
         }
       }
     } else {
+      // Not tunnel
+      for (let x = startX + 1; x < stopX - 1; x ++) {
+        for (let y = startY + 1; y < stopY - 1; y ++) {
+          this.placeFloor(floorIndex, x, y);
+        }
+      }
       for (let x = startX; x < stopX; x ++) {
         if (!(up && x >= doorStartX && x < doorStopX)) {
-          this.placeWall(x, startY);
+          this.placeWall(wallIndex, x, startY);
+        } else {
+          this.placeFloor(floorIndex, x, startY);
         }
         if (!(down && x >= doorStartX && x < doorStopX)) {
-          this.placeWall(x, stopY - 1);
+          this.placeWall(wallIndex, x, stopY - 1);
+        } else {
+          this.placeFloor(floorIndex, x, stopY - 1);
         }
       }
 
       for (let y = startY + 1; y < stopY - 1; y ++) {
         if (!(left && y >= doorStartY && y < doorStopY)) {
-          this.placeWall(startX, y);
+          this.placeWall(wallIndex, startX, y);
+        } else {
+          this.placeFloor(floorIndex, startX, y);
         }
         if (!(right && y >= doorStartY && y < doorStopY)) {
-          this.placeWall(stopX - 1, y);
+          this.placeWall(wallIndex, stopX - 1, y);
+        } else {
+          this.placeFloor(floorIndex, stopX - 1, y);
         }
       }
     }
