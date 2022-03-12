@@ -1,22 +1,21 @@
 import Phaser from 'phaser'
+import Entity from './Entity'
 
-export default class Player extends Phaser.Physics.Arcade.Sprite {
+export default class Player extends Entity {
 
   left: Phaser.Input.Keyboard.Key;
   right: Phaser.Input.Keyboard.Key;
   up: Phaser.Input.Keyboard.Key;
   down: Phaser.Input.Keyboard.Key;
-  camera: Phaser.Cameras.Scene2D.Camera;
-
-  moveSpeed = 300;
-
-  movePull = 0.4;
-  frictionPull = 0.3;
-  cameraPull = 0.15;
 
 	constructor(scene: Phaser.Scene, x: number, y: number) {
-		super(scene, x, y, 'slime')
-    this.camera = this.scene.cameras.main;
+		super(scene, x, y, 'playerForward')
+    this.anims.create({
+      key: 'forward',
+      frames: this.anims.generateFrameNumbers('playerForward', { start: 0, end: 1 }),
+      frameRate: 10,
+      repeat: -1,
+    });
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this)
     this.left = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -25,34 +24,49 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.down = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
 	}
 
+  lookTowardsMouse() {
+    const angle = new Phaser.Math.Vector2(
+      this.scene.input.x + this.scene.cameras.main.scrollX - this.x,
+      this.scene.input.y + this.scene.cameras.main.scrollY - this.y,
+    ).angle();
+
+    console.log(angle);
+
+    this.flipX = false;
+    if (angle > (Math.PI / 4) && angle < (3 * Math.PI / 4)) {
+      this.setTexture('playerForward');
+    } else if (angle > (3 * Math.PI / 4) && angle < (5 * Math.PI / 4)) {
+      this.setTexture('playerSide');
+      this.flipX = true;
+    } else if (angle > (5 * Math.PI / 4) && angle < (7 * Math.PI / 4)) {
+      this.setTexture('playerBack');
+    } else {
+      this.setTexture('playerSide');
+    }
+  }
+
   preUpdate() {
-    // Movement
-    const inputDir = new Phaser.Math.Vector2(
+    const rawInput = new Phaser.Math.Vector2(
       (this.right.isDown ? 1 : 0) - (this.left.isDown ? 1 : 0),
       (this.down.isDown ? 1 : 0) - (this.up.isDown ? 1 : 0),
     );
 
-    if (inputDir.lengthSq() > 0) {
-      const oldVelocity = this.body.velocity;
-      const targetVelocity = inputDir.scale(this.moveSpeed / inputDir.length());
-      const newVelocity = oldVelocity.scale(1 - this.movePull)
-        .add(targetVelocity.scale(this.movePull));
-      this.setVelocity(newVelocity.x, newVelocity.y);
+    const inputDir = rawInput.lengthSq() > 0 ? rawInput.normalize() : rawInput;
+
+    this.move(inputDir);
+
+    // Image
+    const vel = this.body.velocity
+
+    if (Math.abs(vel.x) > Math.abs(vel.y)) {
+      this.setTexture('playerSide');
+      this.flipX = Math.sign(vel.x) < 0;
+    } else if (vel.y < 0) {
+      this.setTexture('playerBack');
     } else {
-      const oldVelocity = this.body.velocity;
-      const newVelocity = oldVelocity.scale(1 - this.frictionPull);
-      this.setVelocity(newVelocity.x, newVelocity.y);
+      this.setTexture('playerForward');
     }
 
-    // Camera follow
-    const cameraTargetX = this.x - this.camera.width / 2;
-    const cameraTargetY = this.y - this.camera.height / 2;
-
-    this.camera.scrollX = this.camera.scrollX * (1 - this.cameraPull) +
-      cameraTargetX * this.cameraPull;
-    this.camera.scrollY = this.camera.scrollY * (1 - this.cameraPull) +
-      cameraTargetY * this.cameraPull;
+    this.lookTowardsMouse();
   }
-
-	// ... other methods and actions
 }
