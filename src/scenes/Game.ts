@@ -1,7 +1,6 @@
 import Phaser from 'phaser';
 import Player from '../objects/Player';
 import LevelManager from '../control/LevelManager';
-//import Wall from '../objects/Wall';
 
 export default class Demo extends Phaser.Scene {
   constructor() {
@@ -16,16 +15,18 @@ export default class Demo extends Phaser.Scene {
   }
 
   create() {
-    let wall;
     const logo = this.add.image(400, 70, 'logo');
 
     const level = new LevelManager(
       this,
       {
-        roomsVertical: 3,
-        roomsHorizontal: 3,
+        roomsVertical: 10,
+        roomsHorizontal: 10,
         roomWidth: 20,
         roomHeight: 15,
+        doorWidth: 4,
+        doorHeight: 4,
+        fill: 0.5,
       },
       {
         image: 'tiles',
@@ -33,12 +34,11 @@ export default class Demo extends Phaser.Scene {
         tileHeight: 32,
       },
     );
-    const player = new Player(this, 200, 200);
+    level.generate();
+    const player = new Player(this, 300, 300);
     //let wall = new Wall(this, 300, 300);
-    wall = this.physics.add.staticGroup();
-    wall.create(300, 300, 'wall')
 
-    this.physics.add.collider(player, wall);
+    this.physics.add.collider(player, level.staticGroup);
 
     this.tweens.add({
       targets: logo,
