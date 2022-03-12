@@ -6,53 +6,52 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   right: Phaser.Input.Keyboard.Key;
   up: Phaser.Input.Keyboard.Key;
   down: Phaser.Input.Keyboard.Key;
-  moveSpeed: number;
   camera: Phaser.Cameras.Scene2D.Camera;
+
+  moveSpeed = 300;
+
+  movePull = 0.4;
+  frictionPull = 0.3;
+  cameraPull = 0.15;
 
 	constructor(scene: Phaser.Scene, x: number, y: number) {
 		super(scene, x, y, 'slime')
     this.camera = this.scene.cameras.main;
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this)
-    //this.setBounce(0.2);
-    //this.setCollideWorldBounds(true);
     this.left = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.right = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.up = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this.down = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    this.moveSpeed = 500;
 	}
 
   preUpdate() {
-    let dx = 0;
-    let dy = 0;
-    if (this.left.isDown) {
-      dx -= 1;
-    }
-    if (this.right.isDown) {
-      dx += 1;
-    }
-    if (this.up.isDown) {
-      dy -= 1;
-    }
-    if (this.down.isDown) {
-      dy += 1;
-    }
-    const magnitude = Math.sqrt(dx*dx + dy*dy);
+    // Movement
+    const inputDir = new Phaser.Math.Vector2(
+      (this.right.isDown ? 1 : 0) - (this.left.isDown ? 1 : 0),
+      (this.down.isDown ? 1 : 0) - (this.up.isDown ? 1 : 0),
+    );
 
-    if (magnitude > 0) {
-      dx /= magnitude;
-      dy /= magnitude;
-
-      this.setVelocityX(this.moveSpeed * dx);
-      this.setVelocityY(this.moveSpeed * dy);
+    if (inputDir.lengthSq() > 0) {
+      const oldVelocity = this.body.velocity;
+      const targetVelocity = inputDir.scale(this.moveSpeed / inputDir.length());
+      const newVelocity = oldVelocity.scale(1 - this.movePull)
+        .add(targetVelocity.scale(this.movePull));
+      this.setVelocity(newVelocity.x, newVelocity.y);
     } else {
-      this.setVelocityX(0)
-      this.setVelocityY(0)
+      const oldVelocity = this.body.velocity;
+      const newVelocity = oldVelocity.scale(1 - this.frictionPull);
+      this.setVelocity(newVelocity.x, newVelocity.y);
     }
 
-    this.camera.scrollX = this.x - this.camera.width / 2
-    this.camera.scrollY = this.y - this.camera.height / 2
+    // Camera follow
+    const cameraTargetX = this.x - this.camera.width / 2;
+    const cameraTargetY = this.y - this.camera.height / 2;
+
+    this.camera.scrollX = this.camera.scrollX * (1 - this.cameraPull) +
+      cameraTargetX * this.cameraPull;
+    this.camera.scrollY = this.camera.scrollY * (1 - this.cameraPull) +
+      cameraTargetY * this.cameraPull;
   }
 
 	// ... other methods and actions
