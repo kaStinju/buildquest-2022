@@ -19,9 +19,9 @@ export default class Demo extends Phaser.Scene {
     let wall;
     const logo = this.add.image(400, 70, 'logo');
 
-    const player = new Player(this, 200, 200);
 
-    /*const level = new LevelManager(
+
+    const level = new LevelManager(
       this,
       {
         roomsVertical: 3,
@@ -34,8 +34,8 @@ export default class Demo extends Phaser.Scene {
         tileWidth: 32,
         tileHeight: 32,
       },
-    );*/
-
+    );
+    const player = new Player(this, 200, 200);
     //let wall = new Wall(this, 300, 300);
     wall = this.physics.add.staticGroup();
     wall.create(300, 300, 'wall')

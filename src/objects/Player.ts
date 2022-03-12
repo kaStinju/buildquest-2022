@@ -6,19 +6,21 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
   right: Phaser.Input.Keyboard.Key;
   up: Phaser.Input.Keyboard.Key;
   down: Phaser.Input.Keyboard.Key;
-  moveSpeed: number
+  moveSpeed: number;
+  camera: Phaser.Cameras.Scene2D.Camera;
 
 	constructor(scene: Phaser.Scene, x: number, y: number) {
 		super(scene, x, y, 'slime')
+    this.camera = this.scene.cameras.main;
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this)
-    this.setBounce(0.2);
-    this.setCollideWorldBounds(true);
+    //this.setBounce(0.2);
+    //this.setCollideWorldBounds(true);
     this.left = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
     this.right = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.up = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this.down = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    this.moveSpeed = 100;
+    this.moveSpeed = 500;
 	}
 
   preUpdate() {
@@ -48,10 +50,10 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.setVelocityX(0)
       this.setVelocityY(0)
     }
+
+    this.camera.scrollX = this.x - this.camera.width / 2
+    this.camera.scrollY = this.y - this.camera.height / 2
   }
 
 	// ... other methods and actions
-  update() {
-    
-  }
 }
