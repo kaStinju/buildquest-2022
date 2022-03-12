@@ -19,8 +19,6 @@ export default class Demo extends Phaser.Scene {
     let wall;
     const logo = this.add.image(400, 70, 'logo');
 
-
-
     const level = new LevelManager(
       this,
       {
