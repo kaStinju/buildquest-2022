@@ -1,5 +1,9 @@
 # buildquest-2022
 
+[Play on IPFS via Lighthouse](https://bafybeiffiy65toger2nw7pqehgo5iq3g3bbt7apw4fxttnpobi5e5qm2vy.ipfs.dweb.link/).
+
+Check it out on [Valist](https://app.valist.io/spaghettigamers/spaghettigame2).
+
 Bootstrapped with [Phaser 3 TypeScript Starter](https://github.com/geocine/phaser3-rollup-typescript).
 
 ## Available Commands
