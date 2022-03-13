@@ -145,7 +145,7 @@ export default class LevelManager {
 
     const entryCount = [up, down, left, right].reduce((n, b) => b ? n + 1 : n, 0);
 
-    const isTunnel = entryCount > 1 && Math.abs(rng.int32()) % 3 == 0;
+    const isTunnel = entryCount > 1 && Math.abs(rng.int32()) % 5 <= 1;
 
     const markGround = (x: number, y: number) => {
       const alt = Math.abs(rng.int32()) % 25 == 0;
@@ -261,6 +261,16 @@ export default class LevelManager {
     }
   }
 
+  getStart(): Phaser.Math.Vector2 {
+    const i = Math.floor(this.levelConfig.roomsHorizontal / 2);
+    const j = Math.floor(this.levelConfig.roomsVertical / 2);
+
+    return new Phaser.Math.Vector2(
+      (i + 0.5) * this.levelConfig.roomWidth * this.tilesConfig.tileWidth,
+      (j + 0.5) * this.levelConfig.roomHeight * this.tilesConfig.tileHeight,
+    );
+  }
+
   generate() {
     const rng = seedrandom("asdf");
 
@@ -292,52 +302,45 @@ export default class LevelManager {
     }
 
     let count = 1;
-    let i = 0;
-    let j = 0;
+    let i = Math.floor(this.levelConfig.roomsHorizontal / 2);
+    let j = Math.floor(this.levelConfig.roomsVertical / 2);
     graph[room(i, j)] = [];
 
     while (count < targetCount) {
       let newI = i;
-      let newJ = i;
-      let bad = false;
+      let newJ = j;
       switch(Math.abs(rng.int32()) % 4) {
         case 0: {
-          if (j == 0) {
-            bad = true;
-          }
           newJ = j - 1;
           break;
         }
         case 1: {
-          if (j == this.levelConfig.roomsVertical - 1) {
-            bad = true;
-          }
           newJ = j + 1;
           break;
         }
         case 2: {
-          if (i == 0) {
-            bad = true;
-          }
           newI = i - 1;
           break;
         }
         default:
         case 3: {
-          if (i == this.levelConfig.roomsHorizontal - 1) {
-            bad = true;
-          }
           newI = i + 1;
           break;
         }
       }
-      if (bad) {
+      if (
+        newI < 0 ||
+        newJ < 0 ||
+        newI >= this.levelConfig.roomsHorizontal ||
+        newJ >= this.levelConfig.roomsVertical
+      ) {
         continue;
       }
       if (!graph[room(newI, newJ)]) {
         count ++;
       }
       createEdge(room(i, j), room(newI, newJ));
+      console.log([i, j]);
       i = newI;
       j = newJ;
     }

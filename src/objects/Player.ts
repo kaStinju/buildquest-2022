@@ -22,6 +22,8 @@ export default class Player extends Entity {
     this.right = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.up = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this.down = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+
+    this.moveSpeed = 1000;
 	}
 
   lookTowardsMouse() {
@@ -29,8 +31,6 @@ export default class Player extends Entity {
       this.scene.input.x + this.scene.cameras.main.scrollX - this.x,
       this.scene.input.y + this.scene.cameras.main.scrollY - this.y,
     ).angle();
-
-    console.log(angle);
 
     this.flipX = false;
     if (angle > (Math.PI / 4) && angle < (3 * Math.PI / 4)) {

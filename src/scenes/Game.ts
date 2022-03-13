@@ -47,7 +47,7 @@ export default class Demo extends Phaser.Scene {
         roomHeight: 15,
         doorWidth: 4,
         doorHeight: 4,
-        fill: 0.5,
+        fill: 0.25,
       },
       {
         image: 'tiles',
@@ -57,7 +57,8 @@ export default class Demo extends Phaser.Scene {
     );
     level.generate();
 
-    const player = new Player(this, 300, 300);
+    const start = level.getStart();
+    const player = new Player(this, start.x, start.y);
     const cameraController = new CameraController(this, player.x, player.y);
     cameraController.follow(player);
 
