@@ -1,6 +1,5 @@
 import Phaser from 'phaser'
 import {getGameController} from '../control/GameController';
-import Bullet from './Bullet';
 import Entity from './Entity'
 
 export default class Player extends Entity {
@@ -9,9 +8,6 @@ export default class Player extends Entity {
   right: Phaser.Input.Keyboard.Key;
   up: Phaser.Input.Keyboard.Key;
   down: Phaser.Input.Keyboard.Key;
-  space: Phaser.Input.Keyboard.Key;
-  hit: Phaser.Sound.BaseSound;
-
 
   shootCooldown: number = 0;
 
@@ -21,7 +17,6 @@ export default class Player extends Entity {
     y: number,
   ) {
 		super(scene, x, y, 'playerForward')
-    this.hit = this.scene.sound.add("hit", { loop: false });
     this.anims.create({
       key: 'forward',
       frames: this.anims.generateFrameNumbers('playerForward', { start: 0, end: 1 }),
@@ -64,6 +59,13 @@ export default class Player extends Entity {
       repeat: -1,
     });
 
+    this.anims.create({
+      key: 'monster',
+      frames: this.anims.generateFrameNumbers('boss', { start: 0, end: 15 }),
+      frameRate: 10,
+      repeat: -1,
+    });
+
     this.scene.add.existing(this);
     this.scene.physics.add.existing(this)
 
@@ -71,7 +73,8 @@ export default class Player extends Entity {
     this.right = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.up = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this.down = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
-    this.space = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+    this.moveSpeed = 150;
 	}
 
   getAngle(): number {
@@ -99,7 +102,12 @@ export default class Player extends Entity {
   shoot() {
     const gameController = getGameController();
     const angle = this.getAngle();
-    gameController.createBullet(this.x, this.y, angle);
+    const dist = 32;
+    gameController.createBullet(
+      this.x + dist * Math.cos(angle),
+      this.y + dist * Math.sin(angle),
+      angle,
+    );
   }
 
   handleShooting() {
@@ -119,15 +127,15 @@ export default class Player extends Entity {
       (this.down.isDown ? 1 : 0) - (this.up.isDown ? 1 : 0),
     );
 
-    if(this.space.isDown) {
-      this.hit.play();
-    }
-
     const idle = rawInput.lengthSq() == 0;
 
     const inputDir = idle ? rawInput : rawInput.normalize();
 
     this.move(inputDir);
+
+    if (this.anims.getName() == 'monster') {
+      return;
+    }
 
     this.lookTowardsMouse(idle);
 

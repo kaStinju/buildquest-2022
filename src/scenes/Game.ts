@@ -19,6 +19,11 @@ export default class Demo extends Phaser.Scene {
       { frameWidth: 32, frameHeight: 32 },
     );
     this.load.spritesheet(
+      'boss',
+      'assets/boss.png',
+      { frameWidth: 128, frameHeight: 128 },
+    );
+    this.load.spritesheet(
       'playerSide',
       'assets/playerSide.png',
       { frameWidth: 32, frameHeight: 32 },

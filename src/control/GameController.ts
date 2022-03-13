@@ -22,6 +22,9 @@ export default class GameController {
 
   scene: Phaser.Scene;
 
+  score = 0;
+  enemyCount = 0;
+
 	constructor(scene: Phaser.Scene) {
     if (gameController) {
       throw new Error('game controller already exists');
@@ -36,8 +39,8 @@ export default class GameController {
     this.levelManager = new LevelManager(
       this.scene,
       {
-        roomsVertical: 10,
-        roomsHorizontal: 10,
+        roomsVertical: 5,
+        roomsHorizontal: 5,
         roomWidth: 20,
         roomHeight: 15,
         doorWidth: 4,
@@ -66,6 +69,15 @@ export default class GameController {
     this.scene.physics.add.collider(this.player, this.levelManager.staticGroup);
 	}
 
+  onPoint() {
+    this.player.moveSpeed += 10;
+    this.score ++;
+
+    if (this.score == this.enemyCount) {
+      this.player.anims.play('monster');
+    }
+  }
+
   createBullet(x: number, y: number, angle: number) {
     const bullet = new Bullet(this.scene, x, y, angle);
     this.updateGroup.add(bullet);
@@ -76,5 +88,6 @@ export default class GameController {
     this.updateGroup.add(enemy);
     this.scene.physics.add.collider(enemy, this.levelManager.staticGroup);
     this.enemyGroup.add(enemy);
+    this.enemyCount ++;
   }
 }

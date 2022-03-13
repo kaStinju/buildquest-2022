@@ -1,7 +1,6 @@
 import Phaser from 'phaser'
 import seedrandom from 'seedrandom'
 import Wall from '../objects/Wall';
-import Enemy from '../objects/Enemy';
 import {getGameController} from './GameController';
 
 interface TilesConfig {
@@ -169,10 +168,14 @@ export default class LevelManager {
     }
 
     if (isTunnel) {
-      for (let x = doorStartX - 1; x < doorStopX + 1; x ++) {
+      for (let x = doorStartX; x < doorStopX; x ++) {
         for (let y = doorStartY - 1; y < doorStopY + 1; y ++) {
           markGround(x, y);
         }
+      }
+      for (let y = doorStartY; y < doorStopY; y ++) {
+        markGround(doorStartX - 1, y);
+        markGround(doorStopX, y);
       }
       markWall(doorStartX - 1, doorStartY - 1);
       markWall(doorStartX - 1, doorStopY);

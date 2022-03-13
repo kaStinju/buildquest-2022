@@ -6,15 +6,15 @@ export default class Entity extends Phaser.Physics.Arcade.Sprite {
   frictionPull = 0.3;
 
 	constructor(scene: Phaser.Scene, x: number, y: number, sprite: string) {
-		super(scene, x, y, sprite)
+		super(scene, x, y, sprite);
     this.scene.add.existing(this);
-    this.scene.physics.add.existing(this)
+    this.scene.physics.add.existing(this);
 	}
 
   move(inputDir: Phaser.Math.Vector2) {
     if (inputDir.lengthSq() > 0) {
       const oldVelocity = this.body.velocity;
-      const targetVelocity = inputDir.scale(this.moveSpeed / inputDir.length());
+      const targetVelocity = inputDir.scale(this.moveSpeed);
       const newVelocity = oldVelocity.scale(1 - this.movePull)
         .add(targetVelocity.scale(this.movePull));
       this.setVelocity(newVelocity.x, newVelocity.y);
