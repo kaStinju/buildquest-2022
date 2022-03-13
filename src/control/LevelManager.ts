@@ -140,15 +140,16 @@ export default class LevelManager {
     const doorStopX = doorStartX + this.levelConfig.doorWidth;
     const doorStopY = doorStartY + this.levelConfig.doorHeight;
 
-    const wallIndex = Math.abs(rng.int32()) % 9;
-    const floorIndex = Math.abs(rng.int32()) % 9;
+    const wallIndex = (Math.abs(rng.int32()) % 5) * 2;
+    const floorIndex = 10 + (Math.abs(rng.int32()) % 5) * 2;
 
     const entryCount = [up, down, left, right].reduce((n, b) => b ? n + 1 : n, 0);
 
     const isTunnel = entryCount > 1 && Math.abs(rng.int32()) % 3 == 0;
 
     const markGround = (x: number, y: number) => {
-      this.placeFloor(floorIndex, x, y);
+      const alt = Math.abs(rng.int32()) % 25 == 0;
+      this.placeFloor(floorIndex + (alt ? 1 : 0), x, y);
       const odds = Math.floor(
         (this.levelConfig.roomHeight * this.levelConfig.roomWidth) / 5,
       );
@@ -157,66 +158,71 @@ export default class LevelManager {
       }
     }
 
+    const markWall = (x: number, y: number) => {
+      const alt = Math.abs(rng.int32()) % 10 == 0;
+      this.placeWall(wallIndex + (alt ? 1 : 0), x, y);
+    }
+
     if (isTunnel) {
       for (let x = doorStartX - 1; x < doorStopX + 1; x ++) {
         for (let y = doorStartY - 1; y < doorStopY + 1; y ++) {
           markGround(x, y);
         }
       }
-      this.placeWall(wallIndex, doorStartX - 1, doorStartY - 1);
-      this.placeWall(wallIndex, doorStartX - 1, doorStopY);
-      this.placeWall(wallIndex, doorStopX, doorStartY - 1);
-      this.placeWall(wallIndex, doorStopX, doorStopY);
+      markWall(doorStartX - 1, doorStartY - 1);
+      markWall(doorStartX - 1, doorStopY);
+      markWall(doorStopX, doorStartY - 1);
+      markWall(doorStopX, doorStopY);
       if (up) {
         for (let y = startY; y < doorStartY - 1; y ++) {
-          this.placeWall(wallIndex, doorStartX - 1, y);
+          markWall(doorStartX - 1, y);
           for (let x = doorStartX; x < doorStopX; x ++) {
             markGround(x, y);
           }
-          this.placeWall(wallIndex, doorStopX, y);
+          markWall(doorStopX, y);
         }
       } else {
         for (let x = doorStartX; x < doorStopX; x ++) {
-          this.placeWall(wallIndex, x, doorStartY - 1);
+          markWall(x, doorStartY - 1);
         }
       }
       if (down) {
         for (let y = doorStopY + 1; y < stopY; y ++) {
-          this.placeWall(wallIndex, doorStartX - 1, y);
+          markWall(doorStartX - 1, y);
           for (let x = doorStartX; x < doorStopX; x ++) {
             markGround(x, y);
           }
-          this.placeWall(wallIndex, doorStopX, y);
+          markWall(doorStopX, y);
         }
       } else {
         for (let x = doorStartX; x < doorStopX; x ++) {
-          this.placeWall(wallIndex, x, doorStopY);
+          markWall(x, doorStopY);
         }
       }
       if (left) {
         for (let x = startX; x < doorStartX - 1; x ++) {
-          this.placeWall(wallIndex, x, doorStartY - 1);
+          markWall(x, doorStartY - 1);
           for (let y = doorStartY; y < doorStopY; y ++) {
             markGround(x, y);
           }
-          this.placeWall(wallIndex, x, doorStopY);
+          markWall(x, doorStopY);
         }
       } else {
         for (let y = doorStartY; y < doorStopY; y ++) {
-          this.placeWall(wallIndex, doorStartX - 1, y);
+          markWall(doorStartX - 1, y);
         }
       }
       if (right) {
         for (let x = doorStopX + 1; x < stopX; x ++) {
-          this.placeWall(wallIndex, x, doorStartY - 1);
+          markWall(x, doorStartY - 1);
           for (let y = doorStartY; y < doorStopY; y ++) {
             markGround(x, y);
           }
-          this.placeWall(wallIndex, x, doorStopY);
+          markWall(x, doorStopY);
         }
       } else {
         for (let y = doorStartY; y < doorStopY; y ++) {
-          this.placeWall(wallIndex, doorStopX, y);
+          markWall(doorStopX, y);
         }
       }
     } else {
@@ -228,12 +234,12 @@ export default class LevelManager {
       }
       for (let x = startX; x < stopX; x ++) {
         if (!(up && x >= doorStartX && x < doorStopX)) {
-          this.placeWall(wallIndex, x, startY);
+          markWall(x, startY);
         } else {
           markGround(x, startY);
         }
         if (!(down && x >= doorStartX && x < doorStopX)) {
-          this.placeWall(wallIndex, x, stopY - 1);
+          markWall(x, stopY - 1);
         } else {
           markGround(x, stopY - 1);
         }
@@ -241,12 +247,12 @@ export default class LevelManager {
 
       for (let y = startY + 1; y < stopY - 1; y ++) {
         if (!(left && y >= doorStartY && y < doorStopY)) {
-          this.placeWall(wallIndex, startX, y);
+          markWall(startX, y);
         } else {
           this.placeFloor(floorIndex, startX, y);
         }
         if (!(right && y >= doorStartY && y < doorStopY)) {
-          this.placeWall(wallIndex, stopX - 1, y);
+          markWall(stopX - 1, y);
         } else {
           this.placeFloor(floorIndex, stopX - 1, y);
         }
@@ -316,6 +322,7 @@ export default class LevelManager {
           newI = i - 1;
           break;
         }
+        default:
         case 3: {
           if (i == this.levelConfig.roomsHorizontal - 1) {
             bad = true;
