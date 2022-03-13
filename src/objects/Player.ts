@@ -9,6 +9,8 @@ export default class Player extends Entity {
   right: Phaser.Input.Keyboard.Key;
   up: Phaser.Input.Keyboard.Key;
   down: Phaser.Input.Keyboard.Key;
+  space: Phaser.Input.Keyboard.Key;
+  hit: Phaser.Sound.BaseSound;
 
 
   shootCooldown: number = 0;
@@ -19,7 +21,7 @@ export default class Player extends Entity {
     y: number,
   ) {
 		super(scene, x, y, 'playerForward')
-
+    this.hit = this.scene.sound.add("hit", { loop: false });
     this.anims.create({
       key: 'forward',
       frames: this.anims.generateFrameNumbers('playerForward', { start: 0, end: 1 }),
@@ -69,6 +71,7 @@ export default class Player extends Entity {
     this.right = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.up = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
     this.down = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+    this.space = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 	}
 
   getAngle(): number {
@@ -115,6 +118,10 @@ export default class Player extends Entity {
       (this.right.isDown ? 1 : 0) - (this.left.isDown ? 1 : 0),
       (this.down.isDown ? 1 : 0) - (this.up.isDown ? 1 : 0),
     );
+
+    if(this.space.isDown) {
+      this.hit.play();
+    }
 
     const idle = rawInput.lengthSq() == 0;
 
