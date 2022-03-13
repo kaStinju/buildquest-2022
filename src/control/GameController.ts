@@ -21,6 +21,7 @@ export default class GameController {
   player: Player;
 
   scene: Phaser.Scene;
+  song: Phaser.Sound.BaseSound;
 
   score = 0;
   enemyCount = 0;
@@ -35,6 +36,9 @@ export default class GameController {
     this.scene = scene;
     this.updateGroup = this.scene.add.group([], { runChildUpdate: true });
     this.enemyGroup = this.scene.add.group();
+
+    this.song = this.scene.sound.add("happy", { loop: true });
+    this.song.play();
 
     this.levelManager = new LevelManager(
       this.scene,
@@ -75,6 +79,7 @@ export default class GameController {
 
     if (this.score == this.enemyCount) {
       this.player.anims.play('monster');
+      this.song.destroy();
     }
   }
 

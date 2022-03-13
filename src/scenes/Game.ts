@@ -8,6 +8,7 @@ export default class Demo extends Phaser.Scene {
 
   preload() {
     this.load.audio('hit', 'assets/hit.mp3')
+    this.load.audio('happy', 'assets/happy.mp3')
     this.load.image('logo', 'assets/phaser3-logo.png');
     this.load.image('slime', 'assets/slime.png');
     this.load.image('tiles', 'assets/tileset.png');
