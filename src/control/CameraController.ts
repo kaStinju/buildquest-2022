@@ -20,13 +20,14 @@ export default class CameraController extends Phaser.GameObjects.GameObject {
     this.x = x;
     this.y = y;
     this.camera = this.scene.cameras.main;
+    this.camera.zoom = 1;
 	}
 
   follow(followee: Followee | null) {
     this.target = followee;
   }
 
-  preUpdate() {
+  update() {
     if (!this.target) {
       return;
     }

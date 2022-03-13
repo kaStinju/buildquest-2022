@@ -38,8 +38,11 @@ export default class Demo extends Phaser.Scene {
   create() {
     const logo = this.add.image(400, 70, 'logo');
 
+    const updateGroup = this.add.group([], { runChildUpdate: true });
+
     const level = new LevelManager(
       this,
+      updateGroup,
       {
         roomsVertical: 10,
         roomsHorizontal: 10,
@@ -61,6 +64,9 @@ export default class Demo extends Phaser.Scene {
     const player = new Player(this, start.x, start.y);
     const cameraController = new CameraController(this, player.x, player.y);
     cameraController.follow(player);
+
+    updateGroup.add(player);
+    updateGroup.add(cameraController);
 
     this.physics.add.collider(player, level.staticGroup);
 
