@@ -1,7 +1,5 @@
 import Phaser from 'phaser';
-import Player from '../objects/Player';
-import LevelManager from '../control/LevelManager';
-import CameraController from '../control/CameraController';
+import GameController from '../control/GameController';
 
 export default class Demo extends Phaser.Scene {
   constructor() {
@@ -13,6 +11,7 @@ export default class Demo extends Phaser.Scene {
     this.load.image('slime', 'assets/slime.png');
     this.load.image('tiles', 'assets/tileset.png');
     this.load.image('wall', 'assets/wall.png');
+    this.load.image('bullet', 'assets/bullet.png');
     this.load.spritesheet(
       'enemy',
       'assets/enemy.png',
@@ -36,51 +35,6 @@ export default class Demo extends Phaser.Scene {
   }
 
   create() {
-    const logo = this.add.image(400, 70, 'logo');
-
-    const updateGroup = this.add.group([], { runChildUpdate: true });
-
-    const level = new LevelManager(
-      this,
-      updateGroup,
-      {
-        roomsVertical: 10,
-        roomsHorizontal: 10,
-        roomWidth: 20,
-        roomHeight: 15,
-        doorWidth: 4,
-        doorHeight: 4,
-        fill: 0.25,
-      },
-      {
-        image: 'tiles',
-        tileWidth: 32,
-        tileHeight: 32,
-      },
-    );
-    level.generate();
-
-    const start = level.getStart();
-    const player = new Player(this, start.x, start.y);
-    const cameraController = new CameraController(this, player.x, player.y);
-    cameraController.follow(player);
-
-    updateGroup.add(player);
-    updateGroup.add(cameraController);
-
-    this.physics.add.collider(player, level.staticGroup);
-
-    this.tweens.add({
-      targets: logo,
-      y: 350,
-      duration: 500,
-      ease: 'Sine.inOut',
-      yoyo: true,
-      repeat: -1
-    });
-  }
-
-  update(){
-
+    new GameController(this);
   }
 }

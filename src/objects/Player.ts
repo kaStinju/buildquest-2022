@@ -1,4 +1,6 @@
 import Phaser from 'phaser'
+import {getGameController} from '../control/GameController';
+import Bullet from './Bullet';
 import Entity from './Entity'
 
 export default class Player extends Entity {
@@ -8,7 +10,14 @@ export default class Player extends Entity {
   up: Phaser.Input.Keyboard.Key;
   down: Phaser.Input.Keyboard.Key;
 
-	constructor(scene: Phaser.Scene, x: number, y: number) {
+
+  shootCooldown: number = 0;
+
+	constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+  ) {
 		super(scene, x, y, 'playerForward')
 
     this.anims.create({
@@ -62,12 +71,15 @@ export default class Player extends Entity {
     this.down = scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
 	}
 
-  lookTowardsMouse(idle: boolean) {
-    const angle = new Phaser.Math.Vector2(
-      this.scene.input.x + this.scene.cameras.main.scrollX - this.x,
-      this.scene.input.y + this.scene.cameras.main.scrollY - this.y,
+  getAngle(): number {
+    return new Phaser.Math.Vector2(
+      this.scene.input.activePointer.x + this.scene.cameras.main.scrollX - this.x,
+      this.scene.input.activePointer.y + this.scene.cameras.main.scrollY - this.y,
     ).angle();
+  }
 
+  lookTowardsMouse(idle: boolean) {
+    const angle = this.getAngle();
     this.flipX = false;
     if (angle > (Math.PI / 4) && angle < (3 * Math.PI / 4)) {
       this.anims.play('forward' + (idle ? 'Idle' : ''), true);
@@ -78,6 +90,23 @@ export default class Player extends Entity {
       this.anims.play('back' + (idle ? 'Idle' : ''), true);
     } else {
       this.anims.play('side' + (idle ? 'Idle' : ''), true);
+    }
+  }
+  
+  shoot() {
+    const gameController = getGameController();
+    const angle = this.getAngle();
+    gameController.createBullet(this.x, this.y, angle);
+  }
+
+  handleShooting() {
+    if (this.shootCooldown != 0) {
+      this.shootCooldown --;
+      return;
+    }
+    if (this.scene.input.activePointer.isDown) {
+      this.shoot();
+      this.shootCooldown = 15;
     }
   }
 
@@ -94,5 +123,7 @@ export default class Player extends Entity {
     this.move(inputDir);
 
     this.lookTowardsMouse(idle);
+
+    this.handleShooting();
   }
 }

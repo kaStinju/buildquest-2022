@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import seedrandom from 'seedrandom'
 import Wall from '../objects/Wall';
 import Enemy from '../objects/Enemy';
+import {getGameController} from './GameController';
 
 interface TilesConfig {
   /**
@@ -59,7 +60,6 @@ interface LevelConfig {
 
 export default class LevelManager {
 
-  updateGroup: Phaser.GameObjects.Group;
   scene: Phaser.Scene;
   tilemap: Phaser.Tilemaps.Tilemap;
   staticGroup: Phaser.Physics.Arcade.StaticGroup;
@@ -69,14 +69,12 @@ export default class LevelManager {
 
   constructor(
     scene: Phaser.Scene,
-    updateGroup: Phaser.GameObjects.Group,
     levelConfig: LevelConfig,
     tilesConfig: TilesConfig
   ) {
 
     this.scene = scene;
     this.levelConfig = levelConfig;
-    this.updateGroup = updateGroup;
     this.tilesConfig = tilesConfig;
     this.staticGroup = scene.physics.add.staticGroup();
 
@@ -117,13 +115,11 @@ export default class LevelManager {
   }
 
   placeEnemy(x: number, y: number) {
-    const enemy = new Enemy(
-      this.scene,
+    const gameController = getGameController();
+    gameController.createEnemy(
       x * this.tilesConfig.tileWidth + 16,
       y * this.tilesConfig.tileHeight + 16,
     );
-    this.scene.physics.add.collider(enemy, this.staticGroup);
-    this.updateGroup.add(enemy);
   }
 
   generateRoom(
@@ -349,7 +345,6 @@ export default class LevelManager {
         count ++;
       }
       createEdge(room(i, j), room(newI, newJ));
-      console.log([i, j]);
       i = newI;
       j = newJ;
     }
