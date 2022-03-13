@@ -22,6 +22,7 @@ export default class Bullet extends Entity {
 
     if (this.scene.physics.collide(this, gameController.enemyGroup, (_, other) => {
       const enemy = other as Enemy;
+      gameController.scene.add.sprite(enemy.x, enemy.y, 'splat');
       enemy.destroy();
     })) {
       gameController.onPoint();

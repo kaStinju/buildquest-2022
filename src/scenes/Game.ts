@@ -14,6 +14,7 @@ export default class Demo extends Phaser.Scene {
     this.load.image('tiles', 'assets/tileset.png');
     this.load.image('wall', 'assets/wall.png');
     this.load.image('bullet', 'assets/bullet.png');
+    this.load.image('splat', 'assets/splat.png');
     this.load.spritesheet(
       'enemy',
       'assets/enemy.png',
